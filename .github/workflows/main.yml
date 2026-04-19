@@ -1,17 +1,29 @@
 name: Build and Deploy NodeJS App on AWS
+
 on:
   push:
     branches:
-    - main
-  
+      - main
+
 jobs:
-  Build-App:
-    runs-on: ubuntu-latestfefsdfsd
+  Test-job:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5    
 
-      - name: Build the Docker Image
-        run: 
+      - name: Basic Info
+        run: |
           echo "hello to cicd"
           uname -a
+
+      - name: Check Docker
+        run: |
+          docker --version
+          docker info
+
+      - name: List Docker Images
+        run: docker images
+
+      - name: List Running Containers
+        run: docker ps -a
