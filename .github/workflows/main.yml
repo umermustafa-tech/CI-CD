@@ -6,24 +6,39 @@ on:
       - main
 
 jobs:
-  Test-job:
+  Build-App:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5    
+      - name: Checkout Code
+        uses: actions/checkout@v5
 
-      - name: Basic Info
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker Image
         run: |
-          echo "hello to cicd"
-          uname -a
+          docker build -t nodeimages .
 
-      - name: Check Docker
+      - name: Tag Docker Image
         run: |
-          docker --version
-          docker info
+          docker tag nodeimages:latest 714196736234.dkr.ecr.ap-south-1.amazonaws.com/nodeimages:latest
 
-      - name: List Docker Images
-        run: docker images
+      - name: Push Docker Image to ECR
+        run: |
+          docker push 714196736234.dkr.ecr.ap-south-1.amazonaws.com/nodeimages:latest
 
-      - name: List Running Containers
-        run: docker ps -a
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ecs-task.json
+          service: nodeapp-service
+          cluster: frugal-bear-qdm9fr
+          wait-for-service-stability: true
