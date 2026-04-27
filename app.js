@@ -1,26 +1,22 @@
-const express = require('express');
+const express = require("express");
+const path = require("path");
+
 const app = express();
-const router = express.Router();
 
-const path = __dirname + '/views/';
-const port = 8080;
+// Serve static files (CSS)
+app.use(express.static(path.join(__dirname, "views")));
 
-router.use(function (req,res,next) {
-  console.log('/' + req.method);
-  next();
+// Routes
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "views/index.html"));
 });
 
-router.get('/', function(req,res){
-  res.sendFile(path + 'index.html');
+app.get("/sharks", (req, res) => {
+    res.send("<h1>🦈 Sharks are awesome!</h1>");
 });
 
-router.get('/sharks', function(req,res){
-  res.sendFile(path + 'barani.html');
+// IMPORTANT: bind to 0.0.0.0 for ECS
+const PORT = 8080;
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
 });
-
-app.use(express.static(path));
-app.use('/', router);
-
-app.listen(port, function () {
-  console.log('Example app listening on port 8080!')
-})
